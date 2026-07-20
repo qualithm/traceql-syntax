@@ -1,0 +1,49 @@
+version: 2
+
+project_name: traceql-syntax
+
+before:
+  hooks:
+    - go mod tidy
+
+# This module is a library (no main package); skip binary builds and ship a
+# source archive only. An empty `builds: []` is NOT sufficient in GoReleaser
+# v2 — it falls back to a default binary build and fails with "no main".
+builds:
+  - skip: true
+
+source:
+  enabled: true
+  name_template: "{{ .ProjectName }}_{{ .Version }}_source"
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: desc
+  use: github
+  format: "- {{ .Message }}"
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+      - Merge pull request
+      - Merge branch
+      - "^Merge .* into main"
+      - "^Merge .* into test"
+      - "^Merge .* into development"
+      - "^Promote .* → .* \\(\\d+ commits?\\)"
+
+release:
+  github:
+    owner: qualithm
+    name: traceql-syntax
+  draft: false
+  prerelease: auto
+  mode: replace

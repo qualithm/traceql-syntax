@@ -1,0 +1,10 @@
+vendor/
+*.test
+*.out
+.DS_Store
+dist/
+
+# Upstream grammar/lexer sources copied by scripts/sync-upstream.sh.
+# Only the generated *.y.go files are used by the Go build.
+*.y
+*.rl

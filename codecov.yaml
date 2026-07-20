@@ -1,0 +1,36 @@
+coverage:
+  status:
+    project:
+      # This fork is entirely vendored upstream Tempo code: tracked for
+      # visibility but does not gate PRs. Any first-party logic added later
+      # should move here under a gating rule.
+      upstream:
+        target: auto
+        informational: true
+        paths:
+          - "traceql/"
+          - "tempopb/"
+          - "internal/"
+    patch:
+      default:
+        target: auto
+        informational: true
+
+flag_management:
+  default_rules:
+    carryforward: true
+  individual_flags:
+    - name: upstream
+      paths:
+        - "traceql/"
+        - "tempopb/"
+        - "internal/"
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+
+ignore:
+  # Generated protobuf sources — coverage on these is misleading.
+  - "**/*.pb.go"

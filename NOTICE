@@ -1,0 +1,26 @@
+# NOTICE
+
+This module is a partial fork of the TraceQL parser packages from Grafana Tempo:
+
+- https://github.com/grafana/tempo — `pkg/traceql`, `pkg/tempopb` (message types
+  only), `pkg/regexp`, `pkg/collector`, and trimmed extracts of `pkg/util` and
+  `pkg/util/log`.
+
+The original Tempo source is Copyright Grafana Labs and licensed under the
+Apache License, Version 2.0. See `LICENSE` for the full license text.
+
+This fork exists to provide a TraceQL parser without inheriting Tempo's
+server/distribution dependencies (`grafana/dskit`, the gRPC service stubs in
+`tempopb`, jaeger, prometheus metrics, etc.). Files in `traceql/`, `tempopb/`,
+and `internal/` are copied near-verbatim from Tempo, with import paths rewritten
+and unused transitive dependencies removed:
+
+- `tempopb/tempo.pb.go` has its generated gRPC client/server service stubs
+  excised (the message types and their marshalling are retained).
+- `tempopb/backendwork.pb.go` (a gRPC-only service) is dropped entirely.
+- `tempopb/pool.go` drops the upstream Prometheus buffer-pool miss metrics.
+- `internal/util/log/log.go` is a trimmed reimplementation exposing only the
+  shared `Logger`; the upstream `InitLogger`/`LevelFilter` helpers (which pulled
+  in `grafana/dskit`) are omitted.
+
+Modifications by Qualithm to this fork are also released under Apache 2.0.
