@@ -1,9 +1,9 @@
 # TraceQL Syntax
 
-Standalone Go parser and AST for [Grafana Tempo](https://github.com/grafana/tempo)'s
-TraceQL. Lifts the upstream `traceql` package (and the `tempopb` message types it
-needs) out of `grafana/tempo` with the server-side runtime dependencies (the gRPC
-service stubs, `dskit`, jaeger, prometheus metrics) stripped away.
+Standalone Go parser and AST for [Grafana Tempo](https://github.com/grafana/tempo)'s TraceQL. Lifts
+the upstream `traceql` package (and the `tempopb` message types it needs) out of `grafana/tempo`
+with the server-side runtime dependencies (the gRPC service stubs, `dskit`, jaeger, prometheus
+metrics) stripped away.
 
 ## Installation
 
@@ -26,12 +26,12 @@ if err != nil {
 ## Relationship to upstream Tempo
 
 The `traceql/`, `tempopb/`, and `internal/` directories are copied near-verbatim from
-`grafana/tempo`, with import paths rewritten to this module. See [NOTICE](NOTICE) for
-the exact packages vendored and the modifications applied (gRPC stubs removed, dskit
-and prometheus dependencies trimmed).
+`grafana/tempo`, with import paths rewritten to this module. See [NOTICE](NOTICE) for the exact
+packages vendored and the modifications applied (gRPC stubs removed, dskit and prometheus
+dependencies trimmed).
 
-Only first-party code (the trimmed shims and this module's own files) is edited
-directly; the vendored directories are refreshed via the sync workflow.
+Only first-party code (the trimmed shims and this module's own files) is edited directly; the
+vendored directories are refreshed via the sync workflow.
 
 ## Syncing from upstream
 
@@ -39,7 +39,7 @@ directly; the vendored directories are refreshed via the sync workflow.
 ./scripts/sync-upstream.sh [TEMPO_VERSION]
 ```
 
-This re-copies the vendored packages from the module cache and rewrites imports. The
-gRPC-stub excision in `tempopb/tempo.pb.go`, the `tempopb/pool.go` metric trim, and
-the `internal/util/log/log.go` shim are manual reconciliations documented in the
-script — review the diff and re-apply them after a sync.
+This re-copies the vendored packages from the module cache and rewrites imports. The gRPC-stub
+excision in `tempopb/tempo.pb.go`, the `tempopb/pool.go` metric trim, and the
+`internal/util/log/log.go` shim are manual reconciliations documented in the script — review the
+diff and re-apply them after a sync.
