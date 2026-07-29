@@ -104,14 +104,27 @@ jobs:
           go-version: "1.26"
           # See the govulncheck job: caching here would poison CI's setup-go key.
           cache: false
-      - name: Resolve pinned Loki version
+      - name: Resolve pinned Tempo version
         id: pin
         run: |
-          ver=$(awk -F'"' '/^LOKI_VERSION="\$\{1:-/ {print $2}' scripts/sync-upstream.sh | sed 's/.*-//;s/}//')
-          echo "Pinned Loki version: $ver"
+          set -euo pipefail
+          src=scripts/sync-upstream.sh
+          # Matches any `<NAME>_VERSION="${1:-<version>}"` pin, so a new vendored
+          # repo doesn't have to teach this template its variable name. The capture
+          # is anchored on the closing `}"` rather than trimmed with a greedy `.*-`,
+          # which would truncate a pseudo-version at its last hyphen.
+          pin_var=$(sed -n 's/^\([A-Z][A-Z0-9_]*_VERSION\)="[$][{]1:-.*/\1/p' "$src" | head -1)
+          ver=$(sed -n 's/^[A-Z][A-Z0-9_]*_VERSION="[$][{]1:-\(.*\)[}]".*/\1/p' "$src" | head -1)
+          if [[ -z "$ver" ]]; then
+            echo "::error::Could not resolve the pinned Tempo version from ${src}."
+            echo "Expected a line of the form '<NAME>_VERSION=\"\${1:-<version>}\"'."
+            echo "Matched variable: ${pin_var:-<none>}"
+            exit 1
+          fi
+          echo "Pinned Tempo version: $ver (from ${pin_var} in ${src})"
           echo "version=$ver" >> "$GITHUB_OUTPUT"
       - name: Prime module cache
-        run: go mod download github.com/grafana/loki/v3@${{ steps.pin.outputs.version }}
+        run: go mod download github.com/grafana/tempo@${{ steps.pin.outputs.version }}
       - name: Re-run sync script
         run: bash scripts/sync-upstream.sh ${{ steps.pin.outputs.version }}
       - name: Fail on drift
@@ -119,7 +132,7 @@ jobs:
         continue-on-error: true
         run: |
           if ! git diff --exit-code; then
-            echo "::error::Vendored upstream files are out of sync with Loki ${{ steps.pin.outputs.version }}."
+            echo "::error::Vendored upstream files are out of sync with Tempo ${{ steps.pin.outputs.version }}."
             echo "Run 'scripts/sync-upstream.sh' locally and commit the result."
             exit 1
           fi
@@ -128,14 +141,18 @@ jobs:
         uses: ./.github/actions/report-scan-failure
         with:
           mode: report
-          title: "${{ github.event.repository.name }}: vendored Loki sources drifted from upstream"
+          title:
+            "${{ github.event.repository.name }}: vendored Tempo sources drifted from
+            upstream"
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Resolve stale failure issue
         if: steps.scan.outcome == 'success'
         uses: ./.github/actions/report-scan-failure
         with:
           mode: resolve
-          title: "${{ github.event.repository.name }}: vendored Loki sources drifted from upstream"
+          title:
+            "${{ github.event.repository.name }}: vendored Tempo sources drifted from
+            upstream"
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Fail job if the scan failed
         if: steps.scan.outcome == 'failure'
