@@ -1,0 +1,9 @@
+# Vendored verbatim from grafana/tempo by scripts/sync-upstream.sh. Reformatting
+# these makes the daily audit's "Upstream Sync Drift" job fail.
+LICENSE
+internal/collector/
+internal/regexp/
+internal/util/errors.go
+internal/util/traceid.go
+tempopb/
+traceql/

@@ -14,5 +14,21 @@
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"
     }
+  },
+  // Owned by scripts/sync-upstream.sh. Saving these — a formatter especially —
+  // fails the daily audit's "Upstream Sync Drift" job. The excluded pair is
+  // hand-reconciled and preserved across a sync, so it stays writable.
+  "files.readonlyInclude": {
+    "traceql/**": true,
+    "tempopb/**": true,
+    "internal/regexp/**": true,
+    "internal/collector/**": true,
+    "internal/util/errors.go": true,
+    "internal/util/traceid.go": true,
+    "LICENSE": true
+  },
+  "files.readonlyExclude": {
+    "tempopb/pool.go": true,
+    "tempopb/tempo.pb.go": true
   }
 }
