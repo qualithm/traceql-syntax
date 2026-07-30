@@ -5,21 +5,25 @@
 #   scripts/sync-upstream.sh [TEMPO_VERSION]
 #
 # Defaults to the version below. The script does not commit; review the diff
-# manually. Several files require MANUAL reconciliation after the copy because
-# they are trimmed reimplementations or hand-stripped generated code — see the
-# "MANUAL" notes below.
+# manually. Re-running against an unchanged pin must leave the tree byte-clean —
+# the daily audit's "Upstream Sync Drift" job asserts exactly that. Several files
+# are trimmed reimplementations or hand-stripped generated code and are therefore
+# preserved across the copy rather than regenerated — see the "MANUAL" notes
+# below.
 #
 # Paths overwritten by this script (do NOT add first-party code here):
 #   traceql/                         (copy_dir, full wipe + copy)
-#   tempopb/                         (copy_dir; backendwork.* then removed)
+#   tempopb/                         (copy_dir; backendwork.* then removed,
+#                                    preserved files below restored)
 #   internal/regexp/                 (copy_dir)
 #   internal/collector/              (copy_dir)
 #   internal/util/errors.go          (cp)
 #   internal/util/traceid.go         (cp)
 #   LICENSE                          (cp from tempopb/LICENSE_APACHE2)
 #
-# First-party / manually-reconciled paths (NEVER overwritten by this script —
-# re-apply the strip after each sync and review the diff):
+# First-party / manually-reconciled paths (NEVER overwritten by this script; they
+# are held aside across the copy, so re-apply the strip by hand when bumping the
+# pin and review the diff against upstream):
 #   tempopb/tempo.pb.go   — excise the generated gRPC client/server service
 #                           block (from the "Reference imports to suppress
 #                           errors" grpc marker through the last _serviceDesc,
@@ -71,10 +75,29 @@ copy_file() {
   chmod u+w "$dst"
 }
 
+# Files that live inside a copy_dir target but are hand-reconciled: hold them
+# aside across the wipe so a re-run is byte-stable. When bumping the pin, diff
+# each against its upstream counterpart and re-apply the strip by hand.
+preserved=(tempopb/tempo.pb.go tempopb/pool.go)
+keep="$(mktemp -d)"
+trap 'rm -rf "$keep"' EXIT
+for f in "${preserved[@]}"; do
+  if [[ -e "$f" ]]; then
+    mkdir -p "$keep/$(dirname "$f")"
+    cp "$f" "$keep/$f"
+  fi
+done
+
 copy_dir "$tempo/pkg/traceql"   "traceql"
 copy_dir "$tempo/pkg/tempopb"   "tempopb"
 copy_dir "$tempo/pkg/regexp"    "internal/regexp"
 copy_dir "$tempo/pkg/collector" "internal/collector"
+
+for f in "${preserved[@]}"; do
+  if [[ -e "$keep/$f" ]]; then
+    copy_file "$keep/$f" "$f"
+  fi
+done
 
 copy_file "$tempo/pkg/util/errors.go"  "internal/util/errors.go"
 copy_file "$tempo/pkg/util/traceid.go" "internal/util/traceid.go"
@@ -102,7 +125,8 @@ copy_file "$tempo/pkg/tempopb/LICENSE_APACHE2" "LICENSE"
 go mod tidy
 echo
 echo "Sync complete against Tempo ${TEMPO_VERSION}."
-echo "MANUAL steps still required (see header): re-excise the gRPC service block"
-echo "and imports from tempopb/tempo.pb.go, re-trim tempopb/pool.go, and confirm"
-echo "internal/util/log/log.go is the trimmed shim. Then run \`go build ./...\`,"
-echo "\`go test ./...\`, and \`govulncheck ./...\`."
+echo "tempopb/tempo.pb.go and tempopb/pool.go were preserved, not regenerated."
+echo "If this run bumped the pin, diff them against upstream and re-apply the"
+echo "strip by hand (see header), and confirm internal/util/log/log.go is still"
+echo "the trimmed shim. Then run \`go build ./...\`, \`go test ./...\`, and"
+echo "\`govulncheck ./...\`."
