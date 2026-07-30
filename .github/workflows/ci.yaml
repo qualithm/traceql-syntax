@@ -39,6 +39,8 @@ jobs:
             code:
               - '**'
               - '!**/*.md'
+              - '!.githooks/**'
+              - '!.vscode/**'
               - '!LICENSE'
               - '!NOTICE'
       - id: tier

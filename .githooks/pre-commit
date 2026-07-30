@@ -1,0 +1,45 @@
+#!/bin/sh
+
+set -e
+
+# Files this module owns. Everything else under traceql/, tempopb/, and internal/
+# is vendored verbatim from grafana/tempo by scripts/sync-upstream.sh and keeps
+# upstream's formatting.
+FIRST_PARTY="./*.go tempopb/pool.go internal/util/log/log.go"
+
+echo "Running pre-commit checks..."
+
+echo "→ Checking staged vendored files..."
+vendored=$(
+  git diff --cached --name-only --diff-filter=ACMR |
+    grep -E '^(traceql/|tempopb/|internal/regexp/|internal/collector/|internal/util/(errors|traceid)\.go$|LICENSE$)' |
+    grep -vE '^tempopb/(pool|tempo\.pb)\.go$' || true
+)
+if [ -n "$vendored" ] && [ -z "$ALLOW_VENDORED_CHANGES" ]; then
+  echo "✗ staged changes to files owned by scripts/sync-upstream.sh:"
+  echo "$vendored" | sed 's/^/    /'
+  echo "  The daily audit re-runs the sync and requires a byte-clean diff, so an"
+  echo "  editor reformat here fails CI. Revert them, or if this is a deliberate"
+  echo "  upstream re-sync, commit with ALLOW_VENDORED_CHANGES=1."
+  exit 1
+fi
+
+echo "→ Running gofmt..."
+# shellcheck disable=SC2086
+out=$(gofmt -s -l $FIRST_PARTY)
+if [ -n "$out" ]; then
+  echo "✗ gofmt found unformatted files:"
+  echo "$out" | sed 's/^/    /'
+  exit 1
+fi
+
+echo "→ Running go vet..."
+go vet ./...
+
+echo "→ Running go build..."
+go build ./...
+
+echo "→ Running go test..."
+go test -race -count=1 ./...
+
+echo "✓ All pre-commit checks passed!"
