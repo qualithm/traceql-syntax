@@ -17,8 +17,8 @@ go build ./...
 go test -race -count=1 ./...
 ```
 
-There is no `golangci-lint` job for this repo — vendored upstream code doesn't conform to it.
-This fork has no first-party package, so nothing is coverage-gated; vendored code is tracked only.
+There is no `golangci-lint` job for this repo — vendored upstream code doesn't conform to it. This
+fork has no first-party package, so nothing is coverage-gated; vendored code is tracked only.
 
 The daily audit re-runs `scripts/sync-upstream.sh` and requires a byte-clean `git diff`, so never
 let a formatter rewrite a vendored file — the comparison has no normalisation, and a single
