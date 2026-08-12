@@ -48,10 +48,51 @@ script and fails on any diff, so never let a formatter rewrite those files.
 
 ## Development
 
+### Prerequisites
+
+- [Go](https://go.dev/dl/) 1.26+
+
+### Setup
+
 ```bash
-make hooks   # point core.hooksPath at .githooks (run once per clone)
-make fmt lint test-race
+make hooks           # point core.hooksPath at .githooks (run once per clone)
+make install-tools   # golangci-lint, goimports, govulncheck, gosec
 ```
+
+> **Note:** Tools are installed to `$GOPATH/bin` (typically `~/go/bin`). Make sure that directory is
+> on your `$PATH`, otherwise the installed binaries won't be found. Add this to your shell config if
+> needed:
+>
+> ```bash
+> echo 'export PATH="$HOME/go/bin:$PATH"' >> ~/.zshrc
+> source ~/.zshrc
+> ```
+
+### Building & Testing
+
+```bash
+make build
+make test
+make test-race
+make lint
+```
+
+### Security Tooling
+
+```bash
+make audit   # govulncheck
+make gosec   # standalone gosec scan
+```
+
+Daily CI security audit runs both tools in `.github/workflows/audit.yaml`.
 
 The pre-commit hook formats only first-party files and refuses staged changes to the vendored
 tree. `.vscode/settings.json` marks the same files read-only as a first line of defence.
+
+## Minimum Supported Go Version
+
+Go 1.26+.
+
+## License
+
+Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE) for upstream attribution.
