@@ -23,7 +23,7 @@ if err != nil {
 // inspect the parsed AST
 ```
 
-## Relationship to upstream Tempo
+## Upstream relationship
 
 The `traceql/`, `tempopb/`, and `internal/` directories are copied near-verbatim from
 `grafana/tempo`, with import paths rewritten to this module. See [NOTICE](NOTICE) for the exact
@@ -33,7 +33,7 @@ dependencies trimmed).
 Only first-party code (the trimmed shims and this module's own files) is edited directly; the
 vendored directories are refreshed via the sync workflow.
 
-## Syncing from upstream
+## Upstream sync
 
 ```bash
 ./scripts/sync-upstream.sh [TEMPO_VERSION]
