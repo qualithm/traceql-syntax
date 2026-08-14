@@ -40,8 +40,8 @@ vendored directories are refreshed via the sync workflow.
 ```
 
 This re-copies the vendored packages from the module cache and rewrites imports. The gRPC-stub
-excision in `tempopb/tempo.pb.go` and the `tempopb/pool.go` metric trim are hand reconciliations,
-so the script holds both files aside and restores them afterwards rather than regenerating them;
+excision in `tempopb/tempo.pb.go` and the `tempopb/pool.go` metric trim are hand reconciliations, so
+the script holds both files aside and restores them afterwards rather than regenerating them;
 `internal/util/log/log.go` is a first-party shim the sync never touches. Everything else under
 `traceql/`, `tempopb/`, and `internal/` is byte-for-byte upstream — the daily audit re-runs this
 script and fails on any diff, so never let a formatter rewrite those files.
@@ -86,8 +86,8 @@ make gosec   # standalone gosec scan
 
 Daily CI security audit runs both tools in `.github/workflows/audit.yaml`.
 
-The pre-commit hook formats only first-party files and refuses staged changes to the vendored
-tree. `.vscode/settings.json` marks the same files read-only as a first line of defence.
+The pre-commit hook formats only first-party files and refuses staged changes to the vendored tree.
+`.vscode/settings.json` marks the same files read-only as a first line of defence.
 
 ## Minimum Supported Go Version
 
