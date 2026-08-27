@@ -1,5 +1,9 @@
 # TraceQL Syntax
 
+[![CI](https://github.com/qualithm/traceql-syntax/actions/workflows/ci.yaml/badge.svg)](https://github.com/qualithm/traceql-syntax/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/qualithm/traceql-syntax/graph/badge.svg)](https://codecov.io/gh/qualithm/traceql-syntax)
+[![Go Reference](https://pkg.go.dev/badge/github.com/qualithm/traceql-syntax.svg)](https://pkg.go.dev/github.com/qualithm/traceql-syntax)
+
 Standalone Go parser and AST for [Grafana Tempo](https://github.com/grafana/tempo)'s TraceQL. Lifts
 the upstream `traceql` package (and the `tempopb` message types it needs) out of `grafana/tempo`
 with the server-side runtime dependencies (the gRPC service stubs, `dskit`, jaeger, prometheus
