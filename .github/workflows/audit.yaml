@@ -31,7 +31,7 @@ jobs:
           # would then hit it, restore too little, and skip saving the fuller cache.
           cache: false
       - name: Install govulncheck
-        run: go install golang.org/x/vuln/cmd/govulncheck@${GOVULNCHECK_VERSION}
+        run: go install "golang.org/x/vuln/cmd/govulncheck@${GOVULNCHECK_VERSION}"
       - name: Run govulncheck
         id: scan
         continue-on-error: true
@@ -145,15 +145,21 @@ jobs:
           echo "Pinned Tempo version: $ver (from ${pin_var} in ${src})"
           echo "version=$ver" >> "$GITHUB_OUTPUT"
       - name: Prime module cache
-        run: go mod download github.com/grafana/tempo@${{ steps.pin.outputs.version }}
+        env:
+          PIN_VERSION: ${{ steps.pin.outputs.version }}
+        run: go mod download "github.com/grafana/tempo@${PIN_VERSION}"
       - name: Re-run sync script
-        run: bash scripts/sync-upstream.sh ${{ steps.pin.outputs.version }}
+        env:
+          PIN_VERSION: ${{ steps.pin.outputs.version }}
+        run: bash scripts/sync-upstream.sh "$PIN_VERSION"
       - name: Fail on drift
         id: scan
         continue-on-error: true
+        env:
+          PIN_VERSION: ${{ steps.pin.outputs.version }}
         run: |
           if ! git diff --exit-code; then
-            echo "::error::Vendored upstream files are out of sync with Tempo ${{ steps.pin.outputs.version }}."
+            echo "::error::Vendored upstream files are out of sync with Tempo ${PIN_VERSION}."
             echo "Run 'scripts/sync-upstream.sh' locally and commit the result."
             exit 1
           fi
