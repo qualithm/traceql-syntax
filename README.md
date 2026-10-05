@@ -63,14 +63,12 @@ make hooks           # point core.hooksPath at .githooks (run once per clone)
 make install-tools   # golangci-lint, goimports, govulncheck, gosec
 ```
 
-> **Note:** Tools are installed to `$GOPATH/bin` (typically `~/go/bin`). Make sure that directory is
-> on your `$PATH`, otherwise the installed binaries won't be found. Add this to your shell config if
-> needed:
->
-> ```bash
-> echo 'export PATH="$HOME/go/bin:$PATH"' >> ~/.zshrc
-> source ~/.zshrc
-> ```
+The tools install into `$GOPATH/bin` (`~/go/bin` by default). Put that directory on your `PATH`:
+
+```bash
+echo 'export PATH="$HOME/go/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
 
 ### Building & Testing
 
@@ -88,7 +86,7 @@ make audit   # govulncheck
 make gosec   # standalone gosec scan
 ```
 
-Daily CI security audit runs both tools in `.github/workflows/audit.yaml`.
+`.github/workflows/audit.yaml` runs `govulncheck` and `gosec` daily.
 
 The pre-commit hook formats only first-party files and refuses staged changes to the vendored tree.
 `.vscode/settings.json` marks the same files read-only as a first line of defence.
