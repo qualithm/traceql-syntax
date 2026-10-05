@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "commands": [
+    {
+      "run": "test -z \"$(gofmt -s -l ./*.go tempopb/pool.go internal/util/log/log.go | tee /dev/stderr)\"",
+      "timeout": "10m",
+      "dir": "."
+    },
+    {
+      "run": "go mod tidy -diff",
+      "timeout": "10m",
+      "dir": "."
+    },
+    {
+      "run": "go vet ./...",
+      "timeout": "10m",
+      "dir": "."
+    },
+    {
+      "run": "go build ./...",
+      "timeout": "10m",
+      "dir": "."
+    },
+    {
+      "run": "go test -race -count=1 ./...",
+      "timeout": "10m",
+      "dir": "."
+    }
+  ]
+}
