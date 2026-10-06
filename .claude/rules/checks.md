@@ -12,8 +12,11 @@ test -z "$(gofmt -s -l ./*.go tempopb/pool.go internal/util/log/log.go | tee /de
 go mod tidy -diff                                                                            # fails on go.mod/go.sum drift; run `go mod tidy` to fix
 go vet ./...
 go build ./...
-go test -race -count=1 ./...
+python3 .claude/checks/ci-jobs.py --skip-ci-only coverage
 ```
+
+The `ci-jobs.py --skip-ci-only coverage` step runs CI's Coverage job locally: the same tests and the
+same 80% line-coverage gate, minus the Codecov upload, so coverage is fixed in the same PR.
 
 There is no `golangci-lint` job for this repo — vendored upstream code doesn't conform to it. This
 fork has no first-party package, so nothing is coverage-gated; vendored code is tracked only.
