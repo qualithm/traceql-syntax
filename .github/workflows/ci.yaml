@@ -28,7 +28,7 @@ env:
 jobs:
   changes:
     name: Detect Changes
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
       code: ${{ steps.f.outputs.code }}
@@ -58,7 +58,7 @@ jobs:
     name: Build
     needs: changes
     if: needs.changes.outputs.code == 'true'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -91,7 +91,7 @@ jobs:
     name: Coverage
     needs: [changes, build]
     if: needs.changes.outputs.code == 'true'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -211,7 +211,7 @@ jobs:
     # (Decision qualithm/pm#744, amendment 2026-10-03). Runs on every PR, docs
     # included: a README can carry an image reference too. Repos not enrolled
     # in dx images-sync.config carry no vendored registry and skip.
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -227,7 +227,7 @@ jobs:
     name: CI Required
     if: always()
     needs: [changes, build, coverage, image-pins]
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Verify dependent jobs
