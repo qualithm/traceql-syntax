@@ -11,5 +11,5 @@
 //	    return err
 //	}
 //
-// See the README for the relationship to upstream Tempo and the sync workflow.
+// See the README for how this fork tracks upstream Tempo and how it is synced.
 package traceqlsyntax
