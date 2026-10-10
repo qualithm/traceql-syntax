@@ -11,5 +11,5 @@
 //	    return err
 //	}
 //
-// See the README for the relationship to upstream Tempo and the sync workflow.
+// The README covers the relationship to upstream Tempo and the sync workflow.
 package traceqlsyntax
