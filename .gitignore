@@ -1,7 +1,13 @@
+# Base block, the same in every repo
+.DS_Store
+.env*
+.idea/
+.vscode/
+coverage/
+
 vendor/
 *.test
 *.out
-.DS_Store
 dist/
 
 # Upstream grammar/lexer sources copied by scripts/sync-upstream.sh.
