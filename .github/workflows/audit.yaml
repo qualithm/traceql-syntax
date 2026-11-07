@@ -136,9 +136,9 @@ jobs:
 
   fuzz:
     name: Fuzz
-    # Weekly and on a dependency change, with the corpus carried from run to run
-    # (qualithm/pm#2119).
-    if: github.event_name != 'schedule' || github.event.schedule == '0 6 * * 1'
+    # Weekly or on dispatch, with the corpus carried from run to run; a push would
+    # hold every promotion behind the fuzz time (qualithm/pm#2119).
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 6 * * 1'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
