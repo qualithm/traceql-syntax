@@ -1,48 +1,27 @@
 ---
-description: "Runtime conventions for errors, logs, settings and CLIs"
+description: "Runtime conventions for the first-party code of a Go module that vendors upstream"
 paths:
-  - "**/*.go"
+  - "*.go"
+  - "logqlmodel/**/*.go"
+  - "internal/util/log/**/*.go"
 ---
 
 # Runtime Conventions
 
-One set of rules for errors, logs, settings and CLIs holds in every language, so logs and errors
-from different repos read and search together. This is how they look here.
+These cover first-party files only. Upstream source copied in by `scripts/sync-upstream.sh` keeps
+upstream's errors and logging, so never edit it to match.
 
 ## Errors
 
-- A package's errors are `ErrName` sentinels or `NameError` types. Messages are lowercase, with no
-  trailing punctuation, and name what failed (`claim code expired`).
-- A binary handles errors once, in `main` or its command runner.
+- A package's errors are `ErrName` sentinels or `NameError` types. New messages are lowercase, with
+  no trailing punctuation, and name what failed (`unexpected token`). A sentinel that mirrors an
+  upstream one keeps upstream's text word for word, so errors match upstream's.
+- A parse error names the position it failed at, so a caller can point to it.
 
 ## Logging
 
-- Log with `log/slog`: the message is an `event`, a `snake_case` name, plus key/value pairs
-  (`slog.Info("user_fetched", "user_id", id)`), never a sentence with values interpolated.
-- Field keys are `snake_case` in every language, so one query reads every service. The shared names
-  are `team_id`, `device_id`, `request_id`, `trace_id`, `duration_ms`, and `error` for the error,
-  never `e` or `err`.
-- Library code never writes to stdout or stderr and adds no log handlers. Pass a `*slog.Logger` in.
-- Logs aren't redacted, so a credential in a log is a leak to fix, not to mask.
-- Never log or trace a request or response body, a query value, or a parser message that quotes one;
-  a cross-zone path writes metadata only.
-
-## Settings
-
-- Config structs are `{Component}Config` with production defaults.
-- Units go in names (`TimeoutMS`, `MaxBodyBytes`), or the field is a `time.Duration`; its env var
-  still says `_MS`. Keep an existing `_SECS` or `_SECONDS` env var.
-- Env var prefix: software that runs on a builder's machine or device (a CLI, an SDK) uses
-  `QUALITHM_`; a service uses its own name (`VARV_`) or none. Standard names (`PORT`, `LOG_LEVEL`)
-  stay unprefixed, and credentials keep their own naming rule.
-
-## CLIs
-
-A binary in `cmd/` follows this contract:
-
-- Exit `0` on success, `1` on a failure or a problem found, `2` on invalid usage. Codes from `3` up
-  are allowed, each mapped one-to-one from an error code in the `--json` envelope.
-- `--json` prints one envelope line, `{ok, code?, message?, dryRun?, data?}`. Its `code` values are
-  stable, because agents branch on them.
-- Every command that changes something takes `--dry-run`, and a dry run exits `0`.
-- Without `--json`, errors go to stderr as `<binary>: <message>`.
+- A library never writes to stdout or stderr and adds no log handlers.
+- A logging shim (`internal/util/log`) exposes what the synced code reads, such as a package-level
+  no-op `Logger`. Keep that shape: synced code reads it directly, so turning it into a parameter
+  breaks the build.
+- Never log a query or a parser message that quotes one: queries can carry user data.
