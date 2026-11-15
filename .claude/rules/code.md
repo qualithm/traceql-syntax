@@ -1,56 +1,44 @@
-# Go Code Guidelines
+---
+description: "Code guidelines for a Go module that vendors upstream source"
+paths:
+  - "*.go"
+  - "logqlmodel/**/*.go"
+  - "internal/util/log/**/*.go"
+  - "tempopb/pool.go"
+  - "tempopb/tempo.pb.go"
+---
 
-`gofmt`, `goimports` (local packages last) and `golangci-lint` (errcheck, errorlint, revive's
-exported-doc rule, gosec, …) enforce formatting, import grouping, `%w`/`errors.Is`, checked errors
-and doc comments on exported identifiers. Fix what they flag; this file covers what they can't.
+# Go Code Guidelines (vendored upstream)
 
-## Layout
+Most of this module is upstream source that `scripts/sync-upstream.sh` copies in. Its header lists
+the paths it overwrites and the first-party ones it keeps. These rules cover the first-party files
+only.
 
-- `cmd/<binary>/` for entry points, the module root for the library API (an app-only module has no
-  root package), `internal/` for private packages, `examples/<name>/` for runnable examples,
-  `doc.go` for the one-line package comment.
-- Tests sit next to the code in `_test.go` files: `package foo_test` for black-box tests of the
-  exported API, `package foo` for whitebox tests.
+## Never hand-edit synced paths
 
-## Errors
+- A change to a path the script overwrites is lost on the next sync and fails the daily audit's
+  Upstream Sync Drift job. Change the pin and re-run the script instead, or move the change into a
+  first-party file.
+- Upstream code keeps upstream's style: its errors, panics, logging and lint findings stay as they
+  are. Don't reformat it or "fix" it to match these rules.
+- A file the script holds aside (a trimmed reimplementation or hand-stripped generated code) is
+  reconciled by hand when the pin moves: follow the script's notes, and review the diff against
+  upstream.
 
-- Lowercase, no trailing punctuation or newline. Wrap with context:
-  `fmt.Errorf("reading config: %w", err)`.
-- Sentinel errors are `ErrName` for stable comparisons; error types are `NameError` with `Unwrap`
-  when callers need fields. Document returned sentinels with `[ErrName]` doc links.
-- Never panic in library code; reserve `panic` for programmer bugs. Use `_ =` deliberately and
-  rarely.
+## First-party code
 
-## Runtime
-
-- Log with `log/slog` key/value pairs (`slog.Info("user_fetched", "user_id", id)`), never
-  `fmt.Println` or `log.Printf`. Pass a `*slog.Logger` into components; avoid global state in
-  libraries.
-- `context.Context` is the first argument of anything that blocks or does I/O, and cancellation is
-  honored. Never start a goroutine without a clear lifecycle; prefer `errgroup`/`sync.WaitGroup` and
-  document who owns shared state.
-- Config structs are `{Component}Config` with a commented field each, units in names (`TimeoutMS`),
-  and a `Default{Type}()` constructor with production values.
-
-## Tests
-
-Table-driven with `t.Run`, `t.Parallel()` when independent, `t.TempDir()` for files. Benchmarks call
-`b.ReportAllocs()`.
-
-## When code changes
-
-A behavior change carries tests that cover its new lines (`dx coverage patch` checks them after the
-coverage step); update doc comments, defaults and flags it affects. Run `go mod tidy` after any
-dependency change and commit `go.sum`. Prefer the standard library and justify each new direct
-dependency; no `replace` directives in main modules.
-
-## Environment variables
-
-Adding or renaming an env var is a two-file change in one commit: declare it in `env-example` and
-classify it in `env-manifest.json` (a per-environment static, a `generate` recipe, or an `obtain`
-pointer to where the value comes from). Run `dx env local` before committing; it fails when a
-required key is missing or empty in `.env`, the one local env file. `*-example` template repos carry
-neither file.
+- `make lint` runs `golangci-lint` with the repo's `.golangci.yaml` (errcheck, errorlint, revive's
+  exported-doc rule, gosec) over the first-party packages. `gofmt` and `goimports` (local packages
+  last) format them, and `doc.go` holds the one-line package comment.
+- Errors are lowercase, with no trailing punctuation, and wrapped with context:
+  `fmt.Errorf("parsing query: %w", err)`. Never panic on input: a parser returns an error for any
+  string it's given. A sentinel that mirrors upstream keeps upstream's exact text.
+- Tests sit next to the code: table-driven with `t.Run`, plus the fuzz (and, where present,
+  property) tests at the root. A behaviour change carries tests that cover its new lines
+  (`dx coverage patch` checks them).
+- Run `go mod tidy` after a dependency change and commit `go.sum`. No `replace` directives.
+- A hand-stripped generated file (`tempopb/tempo.pb.go`) takes only the strip its sync note
+  describes: no doc comments, rewording or reformatting, so the next re-strip stays a clean diff.
 
 ## Generated files
 
