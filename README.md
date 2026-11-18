@@ -89,7 +89,6 @@ make gosec   # standalone gosec scan
 `.github/workflows/audit.yaml` runs `govulncheck` and `gosec` daily.
 
 The pre-commit hook formats only first-party files and refuses staged changes to the vendored tree.
-`.vscode/settings.json` marks the same files read-only as a first line of defence.
 
 ## Minimum Supported Go Version
 
