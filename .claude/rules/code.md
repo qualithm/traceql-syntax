@@ -42,5 +42,5 @@ only.
 
 ## Generated files
 
-`.github/workflows/ci.yaml` is generated from `dx/ci-templates/`; change the template and run
-`dx ci sync` from dx, never edit it here. `CI Required` and `PR Title` are required.
+`.github/workflows/ci.yaml` is generated from `dx/ci-templates/` by `dx ci sync`; never edit it
+here. Required checks: `CI Required`, `PR Title`, `Decision Citations`.
