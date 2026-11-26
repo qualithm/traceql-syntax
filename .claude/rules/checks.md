@@ -8,6 +8,7 @@ This repo's `ci.yaml` is generated from `dx/ci-templates/go-vendored.yaml` via `
 for drift with `dx ci drift`). Run these before committing so CI passes on the first try:
 
 ```bash
+bash .claude/checks/images.sh
 test -z "$(gofmt -s -l ./*.go tempopb/pool.go internal/util/log/log.go | tee /dev/stderr)"   # first-party files only; vendored packages keep upstream style
 go mod tidy -diff                                                                            # fails on go.mod/go.sum drift; run `go mod tidy` to fix
 go vet ./...
@@ -16,7 +17,7 @@ python3 .claude/checks/ci-jobs.py --skip-ci-only coverage
 ```
 
 The `ci-jobs.py --skip-ci-only coverage` step runs CI's Coverage job locally: the same tests and the
-same 80% line-coverage gate, minus the Codecov upload, so coverage is fixed in the same PR.
+same 80% line-coverage gate, minus Codecov, so coverage is fixed in the same PR.
 
 There is no `golangci-lint` job for this repo — vendored upstream code doesn't conform to it. This
 fork has no first-party package, so nothing is coverage-gated; vendored code is tracked only.
